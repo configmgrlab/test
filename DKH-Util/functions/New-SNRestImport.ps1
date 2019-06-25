@@ -11,17 +11,17 @@ Input Parameter for ServiceNow UserName
 .PARAMETER Pass
 Input parameter for ServiceNow Secret
 
-.PARAMETER ImportSet
-Parameter for selection of importset table
+.PARAMETER ImportSetTable
+Input parameter for ServiceNow importset tables
 
-.PARAMETER Environment
-Parameter for selecting ServiceNow environment
+.PARAMETER InstanceName
+Input parameter for ServiceNow instance name
 
 .PARAMETER Body
 Input parameter for the body of a rest message
 
 .EXAMPLE
-New-SNRestImport -UserName sp-ntk -Pass Password -ImportSet Building -Environment Production -Body $output 
+New-SNRestImport -UserName sp-ntk -Pass PAX99pax -ImportSetTable u_building_import -InstanceName kongsvangtest -Body $Obj
 
 .NOTES
 ===========================================================================
@@ -48,13 +48,13 @@ function New-SNRestImport {
 
         # Parameter for which ServiceNow table to call
         [Parameter(Mandatory)]
-        [ValidateSet("Rooms", "Building")]
-        $ImportSet,
+        [string]
+        $ImportSetTable,
 
         # Parameter for selecting Environment
         [Parameter(Mandatory)]
-        [ValidateSet("Prod","Test")]
-        $Environment,
+        [string]
+        $InstanceName,
 
         # Input paramenter for the body
         [Parameter(Mandatory = $true)]
@@ -75,25 +75,9 @@ function New-SNRestImport {
     $headers.Add('Accept', 'application/json')
     $headers.Add('Content-Type', 'application/json')
 
-    # Specify table to call
-    switch ($ImportSet) {
-        "Rooms" {
-            $ImportSet = "u_room_import"
-        }
-        "Building" {
-            $ImportSet = "u_building_import"
-        }
-    }
 
-    # Specify environment to call
-    switch ($Environment) {
-        "Prod" {
-            $Uri = "https://kongsvang.service-now.com/api/now/import/"+$ImportSet
-        }
-        "Test" {
-            $Uri = "https://kongsvang.service-now.com/api/now/import/"+$ImportSet
-        }
-    }
+    # Specify the URI
+    $Uri = "https://" + $InstanceName + ".service-now.com/api/now/import/" + $ImportSetTable
 
     # Specify HTTP method
     $method = "post"
